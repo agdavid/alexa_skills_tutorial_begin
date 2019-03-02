@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
     handler
 };
@@ -15,20 +17,29 @@ function handler(event, context) {
     */
 
     if (request.type === 'LaunchRequest') {
-        // set options object
-        options = {
-            // skill instruction
-            speechText: 'Welcome to Greetings skill. Using our skill you can greet your guests. Whom do you want to greet?',
-            // on silence
-            repromptText: 'You can say for example, say hello to John.',
-            endSession: false
-        };
+        // set options
+        // skill instruction
+        options.speechText: 'Welcome to Greetings skill. Using our skill you can greet your guests. Whom do you want to greet?',
+        // on silence
+        options.repromptText: 'You can say for example, say hello to John.',
+        options.endSession: false
         // create response matching ASK syntax
         response = buildResponse(options);
         // send response
         context.succeed(response);
     } else if (request.type === 'IntentRequest') {
+        if (request.intent.name === 'HelloIntent') {
+            let name = request.intent.slots.FirstName.value;
 
+            options.speechText = `Hello ${name}. `;
+            options.speechText += getTiming();
+            options.endSession = true;
+            response = buildResponse(options);
+            context.succeed(response);
+            
+        } else {
+            context.fail('Unknown intent type');
+        }
     } else if (request.type === 'SessionEndedRequest') {
 
     } else {
@@ -59,4 +70,20 @@ function buildResponse(options) {
     }
 
     return response;
+}
+
+function getTiming() {
+    let myDate = new Date();
+    let hours = myDate.getUTCHours() - 8; // adjust for PST timezone
+    if (hours < 0) {
+        hours = hours + 24;
+    }
+
+    if (hours < 12) {
+        return "Good morning. ";
+    } else if (hours < 18)  {
+        return "Good afternoon. ";
+    } else {
+        return "Good evening. ";
+    }
 }
