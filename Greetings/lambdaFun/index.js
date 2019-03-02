@@ -6,9 +6,7 @@ module.exports = {
 
 function handler(event, context) {
     try {
-        let request = event.request;
-        let response;
-        let options;
+        let request = event.request;        
         /*
         request.type
         i)   LaunchRequest       Ex: "Open greeter"
@@ -17,6 +15,7 @@ function handler(event, context) {
         */
     
         if (request.type === 'LaunchRequest') {
+            let options = {};
             // set options
             // skill instruction
             options.speechText = 'Welcome to Greetings skill. Using our skill you can greet your guests. Whom do you want to greet?';
@@ -24,17 +23,17 @@ function handler(event, context) {
             options.repromptText = 'You can say for example, say hello to John.';
             options.endSession = false;
             // create response matching ASK syntax
-            response = buildResponse(options);
+            let response = buildResponse(options);
             // send response
             context.succeed(response);
         } else if (request.type === 'IntentRequest') {
             if (request.intent.name === 'HelloIntent') {
                 let name = request.intent.slots.FirstName.value;
-    
+                let options = {};
                 options.speechText = `Hello ${name}. `;
                 options.speechText += getTiming();
                 options.endSession = true;
-                response = buildResponse(options);
+                let response = buildResponse(options);
                 context.succeed(response);
                 
             } else {
