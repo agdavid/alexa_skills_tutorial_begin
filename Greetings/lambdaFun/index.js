@@ -19,10 +19,10 @@ function handler(event, context) {
         if (request.type === 'LaunchRequest') {
             // set options
             // skill instruction
-            options.speechText: 'Welcome to Greetings skill. Using our skill you can greet your guests. Whom do you want to greet?',
+            options.speechText = 'Welcome to Greetings skill. Using our skill you can greet your guests. Whom do you want to greet?';
             // on silence
-            options.repromptText: 'You can say for example, say hello to John.',
-            options.endSession: false
+            options.repromptText = 'You can say for example, say hello to John.';
+            options.endSession = false;
             // create response matching ASK syntax
             response = buildResponse(options);
             // send response
@@ -48,7 +48,7 @@ function handler(event, context) {
     } catch(e) {
         context.fail(`Error: ${e}`);
     }
-}
+};
 
 function buildResponse(options) {
     // see https://developer.amazon.com/docs/custom-skills/request-and-response-json-reference.html#response-body-syntax
@@ -73,7 +73,7 @@ function buildResponse(options) {
     }
 
     return response;
-}
+};
 
 function getTiming() {
     let myDate = new Date();
@@ -89,4 +89,4 @@ function getTiming() {
     } else {
         return "Good evening. ";
     }
-}
+};
