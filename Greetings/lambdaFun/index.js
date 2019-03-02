@@ -5,45 +5,48 @@ module.exports = {
 };
 
 function handler(event, context) {
-
-    let request = event.request;
-    let response;
-    let options;
-    /*
-    request.type
-    i)   LaunchRequest       Ex: "Open greeter"
-    ii)  IntentRequest       Ex: "Say hello to John" or "ask greeter to say hello to John"
-    iii) SessionEndedRequest Ex: "exit" or error or timeout
-    */
-
-    if (request.type === 'LaunchRequest') {
-        // set options
-        // skill instruction
-        options.speechText: 'Welcome to Greetings skill. Using our skill you can greet your guests. Whom do you want to greet?',
-        // on silence
-        options.repromptText: 'You can say for example, say hello to John.',
-        options.endSession: false
-        // create response matching ASK syntax
-        response = buildResponse(options);
-        // send response
-        context.succeed(response);
-    } else if (request.type === 'IntentRequest') {
-        if (request.intent.name === 'HelloIntent') {
-            let name = request.intent.slots.FirstName.value;
-
-            options.speechText = `Hello ${name}. `;
-            options.speechText += getTiming();
-            options.endSession = true;
+    try {
+        let request = event.request;
+        let response;
+        let options;
+        /*
+        request.type
+        i)   LaunchRequest       Ex: "Open greeter"
+        ii)  IntentRequest       Ex: "Say hello to John" or "ask greeter to say hello to John"
+        iii) SessionEndedRequest Ex: "exit" or error or timeout
+        */
+    
+        if (request.type === 'LaunchRequest') {
+            // set options
+            // skill instruction
+            options.speechText: 'Welcome to Greetings skill. Using our skill you can greet your guests. Whom do you want to greet?',
+            // on silence
+            options.repromptText: 'You can say for example, say hello to John.',
+            options.endSession: false
+            // create response matching ASK syntax
             response = buildResponse(options);
+            // send response
             context.succeed(response);
-            
+        } else if (request.type === 'IntentRequest') {
+            if (request.intent.name === 'HelloIntent') {
+                let name = request.intent.slots.FirstName.value;
+    
+                options.speechText = `Hello ${name}. `;
+                options.speechText += getTiming();
+                options.endSession = true;
+                response = buildResponse(options);
+                context.succeed(response);
+                
+            } else {
+                throw 'Unknown intent type';
+            }
+        } else if (request.type === 'SessionEndedRequest') {
+    
         } else {
-            context.fail('Unknown intent type');
+            throw 'Unknown intent type';
         }
-    } else if (request.type === 'SessionEndedRequest') {
-
-    } else {
-        context.fail('Unknown intent type');
+    } catch(e) {
+        context.fail(`Error: ${e}`);
     }
 }
 
