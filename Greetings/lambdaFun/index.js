@@ -1,5 +1,7 @@
 'use strict';
 
+let http = require('http');
+
 module.exports = {
     handler
 };
@@ -32,10 +34,16 @@ function handler(event, context) {
                 let options = {};
                 options.speechText = `Hello ${name}. `;
                 options.speechText += getTiming();
-                options.endSession = true;
-                let response = buildResponse(options);
-                context.succeed(response);
-                
+                getQuote(function(quote,err){
+                    if(err) {
+                        context.fail(err);
+                    } else {
+                        options.speechText += quote;
+                        options.endSession = true;
+                        let response = buildResponse(options);
+                        context.succeed(response);
+                    }
+                });
             } else {
                 throw 'Unknown intent type';
             }
@@ -89,3 +97,23 @@ function getTiming() {
         return "Good evening. ";
     }
 };
+
+function getQuote(callback) {
+    let url = 'http://api.forismatic.com/api/1.0/json?method=getQuote&lang=en&format=json';
+    let req = http.get(url, function(res) {
+        let body = "";
+        res.on('data', function(chunk) {
+            body += chunk;
+        });
+
+        res.on('end', function() {
+            body = body.replace(/\\/g,'');
+            let quote = JSON.parse(body);
+            callback(quote.quoteText);
+        });
+    });
+
+    req.on('error', function(err) {
+        callback('', err);
+    });
+}
