@@ -41,11 +41,19 @@ function validRsp(ctx,options) {
 
 }
 
-function validCard(ctx) {
+function validCard(ctx, standardCard) {
      expect(ctx.speechResponse.response.card).not.to.be.undefined;
-     expect(ctx.speechResponse.response.card.type).to.be.equal('Simple');
      expect(ctx.speechResponse.response.card.title).not.to.be.undefined;
-     expect(ctx.speechResponse.response.card.content).not.to.be.undefined;
+     if(standardCard) {
+      expect(ctx.speechResponse.response.card.type).to.be.equal('Standard');
+      expect(ctx.speechResponse.response.card.text.not.to.be.undefined);
+      expect(ctx.speechResponse.response.card.image).not.to.be.undefined;
+      expect(ctx.speechResponse.response.card.image.smallImageUrl).to.match(/^https:\/\//);
+      expect(ctx.speechResponse.response.card.image.largeImageUrl).to.match(/^https:\/\//);
+     } else {
+      expect(ctx.speechResponse.response.card.type).to.be.equal('Simple');
+      expect(ctx.speechResponse.response.card.title).not.to.be.undefined;
+     }
 }
 
 
@@ -102,48 +110,48 @@ describe('All intents', function() {
        });
      });
 
-     //it('valid outputSpeech', function() {
-     //  expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
-     //});
+     it('valid outputSpeech', function() {
+      expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Welcome to.*<\/speak>/);
+     });
     
-     //it('valid repromptSpeech', function() {
-     //  expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
-     //});
+     it('valid repromptSpeech', function() {
+      expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>You can say for example.*<\/speak>/);
+     });
 
   });
 
-    describe(`Test TBDIntentName`, function() {
+    // describe(`Test TBDIntentName`, function() {
 
-        before(function(done) {
-          event.request.intent = {};
-          event.session.attributes = {};
-          event.request.type = 'IntentRequest';
-          event.request.intent.name = 'TBDIntentName';
-          event.request.intent.slots = {
-            TBDSlotName: {
-              name: 'TBDSlotName',
-              value: 'TBDValue'
-            }
-          };
-          ctx.done = done;
-          lambdaToTest.handler(event , ctx);
-        });
+    //     before(function(done) {
+    //       event.request.intent = {};
+    //       event.session.attributes = {};
+    //       event.request.type = 'IntentRequest';
+    //       event.request.intent.name = 'TBDIntentName';
+    //       event.request.intent.slots = {
+    //         TBDSlotName: {
+    //           name: 'TBDSlotName',
+    //           value: 'TBDValue'
+    //         }
+    //       };
+    //       ctx.done = done;
+    //       lambdaToTest.handler(event , ctx);
+    //     });
 
-       it('valid response', function() {
-         validRsp(ctx, {
-           endSession: TBD
-         });
-       });
+    //    it('valid response', function() {
+    //      validRsp(ctx, {
+    //        endSession: TBD
+    //      });
+    //    });
 
-       //it('valid outputSpeech', function() {
-       //  expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
-       //});
+    //    //it('valid outputSpeech', function() {
+    //    //  expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
+    //    //});
     
-       //it('valid repromptSpeech', function() {
-       //  expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
-       //});
+    //    //it('valid repromptSpeech', function() {
+    //    //  expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
+    //    //});
 
-    });
+    // });
 
 
 });
