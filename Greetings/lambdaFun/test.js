@@ -193,9 +193,7 @@ describe('All intents', function() {
     describe(`correct invocation`, function() {
       before(function(done) {
         event.request.intent = {};
-        event.session.attributes = {
-          quoteIntent: true
-        };
+        event.session.attributes = ctx.speechResponse.sessionAttributes;
         event.request.type = 'IntentRequest';
         event.request.intent.name = 'AnotherQuoteIntent';
         event.request.intent.slots = {};
@@ -225,9 +223,7 @@ describe('All intents', function() {
     describe(`wrong invocation`, function() {
       before(function(done) {
         event.request.intent = {};
-        event.session.attributes = {
-          // no quoteIntent  
-        };
+        event.session.attributes = {};
         event.request.type = 'IntentRequest';
         event.request.intent.name = 'AnotherQuoteIntent';
         event.request.intent.slots = {};
@@ -243,6 +239,51 @@ describe('All intents', function() {
   
       it('valid outputSpeech', function() {
         expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/Wrong invocation.*/)
+      });
+    });
+  });
+
+  describe(`Test StopOrCancelIntent`, function() {
+    describe(`AMAZON.StopIntent`, function() {
+      before(function(done) {
+        event.request.intent = {};
+        event.session.attributes = {};
+        event.request.type = 'IntentRequest';
+        event.request.intent.name = 'AMAZON.StopIntent';
+        event.request.intent.slots = {};
+        ctx.done = done;
+        lambdaToTest.handler(event, ctx);
+      });
+  
+      it('valid response', function() {
+        validRsp(ctx,{
+          endSession: true,
+        });
+      });
+  
+      it('valid outputSpeech', function() {
+        expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/Goodbye.*/)
+      });
+    });
+    describe(`AMAZON.CancelIntent`, function() {
+      before(function(done) {
+        event.request.intent = {};
+        event.session.attributes = {};
+        event.request.type = 'IntentRequest';
+        event.request.intent.name = 'AMAZON.CancelIntent';
+        event.request.intent.slots = {};
+        ctx.done = done;
+        lambdaToTest.handler(event, ctx);
+      });
+  
+      it('valid response', function() {
+        validRsp(ctx,{
+          endSession: true,
+        });
+      });
+  
+      it('valid outputSpeech', function() {
+        expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/Goodbye.*/)
       });
     });
   });
