@@ -140,6 +140,7 @@ function handleHelloIntent(context, request) {
 
 function handleQuoteIntent(context, session) {
     let options = {};
+    options.session = session;
     options.speechText = `Here is your quote. `;
     getQuote(function(quote,err){
         if(err) {
