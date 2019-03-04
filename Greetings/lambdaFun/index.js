@@ -66,6 +66,24 @@ function buildResponse(options) {
         };
     }
 
+    if (options.cardTitle) {
+        response.response.card = {
+            type: "Simple",
+            title: options.cardTitle,
+        }
+
+        if(options.imageUrl) {
+            response.response.card.type="Standard";
+            response.response.card.text = options.cardContent;
+            response.response.card.image = {
+                smallImageUrl: options.imageUrl,
+                largeImageUrl: options.imageUrl
+            };
+        } else {
+            response.response.card.content = options.cardContent
+        }
+    }
+
     if(options.session && options.session.attributes) {
         response.sessionAttributes = options.session.attributes;
     }
