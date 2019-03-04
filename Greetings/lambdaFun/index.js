@@ -24,20 +24,7 @@ function handler(event, context) {
             handleLaunchRequest(context);
         } else if (request.type === 'IntentRequest') {
             if (request.intent.name === 'HelloIntent') {
-                let name = request.intent.slots.FirstName.value;
-                let options = {};
-                options.speechText = `Hello <say-as interpret-as="spell-out">${name}</say-as> ${name}. `;
-                options.speechText += getTiming();
-                getQuote(function(quote,err){
-                    if(err) {
-                        context.fail(err);
-                    } else {
-                        options.speechText += quote;
-                        options.endSession = true;
-                        let response = buildResponse(options);
-                        context.succeed(response);
-                    }
-                });
+                handleHelloIntent(context, request);
             } else {
                 throw 'Unknown intent type';
             }
@@ -124,4 +111,21 @@ function handleLaunchRequest(context) {
     let response = buildResponse(options);
     // send response
     context.succeed(response);
+}
+
+function handleHelloIntent(context, request) {
+    let name = request.intent.slots.FirstName.value;
+    let options = {};
+    options.speechText = `Hello ${name}. This session is closed. `;
+    options.speechText += getTiming();
+    getQuote(function(quote,err){
+        if(err) {
+            context.fail(err);
+        } else {
+            options.speechText += quote;
+            options.endSession = true;
+            let response = buildResponse(options);
+            context.succeed(response);
+        }
+    });
 }
