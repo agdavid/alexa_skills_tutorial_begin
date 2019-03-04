@@ -15,19 +15,13 @@ function handler(event, context) {
         ii)  IntentRequest       Ex: "Say hello to John" or "ask greeter to say hello to John"
         iii) SessionEndedRequest Ex: "exit" or error or timeout
         */
+       let session = event.session;
+       if(!event.session.attributes) {
+           event.session.attributes = {};
+       }
     
         if (request.type === 'LaunchRequest') {
-            let options = {};
-            // set options
-            // skill instruction
-            options.speechText = 'Welcome to Greetings skill. Using our skill you can greet your guests. Whom do you want to greet?';
-            // on silence
-            options.repromptText = 'You can say for example, say hello to John.';
-            options.endSession = false;
-            // create response matching ASK syntax
-            let response = buildResponse(options);
-            // send response
-            context.succeed(response);
+            handleLaunchRequest(context);
         } else if (request.type === 'IntentRequest') {
             if (request.intent.name === 'HelloIntent') {
                 let name = request.intent.slots.FirstName.value;
@@ -116,4 +110,18 @@ function getQuote(callback) {
     req.on('error', function(err) {
         callback('', err);
     });
+}
+
+function handleLaunchRequest(context) {
+    let options = {};
+    // set options
+    // skill instruction
+    options.speechText = 'Welcome to Greetings skill. Using our skill you can greet your guests. Whom do you want to greet?';
+    // on silence
+    options.repromptText = 'You can say for example, say hello to John.';
+    options.endSession = false;
+    // create response matching ASK syntax
+    let response = buildResponse(options);
+    // send response
+    context.succeed(response);
 }
