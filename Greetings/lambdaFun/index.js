@@ -25,6 +25,8 @@ function handler(event, context) {
         } else if (request.type === 'IntentRequest') {
             if (request.intent.name === 'HelloIntent') {
                 handleHelloIntent(context, request);
+            } else if (request.intent.name === 'QuoteIntent') {
+                handleQuoteIntent(context);
             } else {
                 throw 'Unknown intent type';
             }
@@ -118,6 +120,21 @@ function handleHelloIntent(context, request) {
     let options = {};
     options.speechText = `Hello ${name}. This session is open. `;
     options.speechText += getTiming();
+    getQuote(function(quote,err){
+        if(err) {
+            context.fail(err);
+        } else {
+            options.speechText += quote;
+            options.endSession = false;
+            let response = buildResponse(options);
+            context.succeed(response);
+        }
+    });
+}
+
+function handleQuoteIntent(context) {
+    let options = {};
+    options.speechText = `Here is your quote. `;
     getQuote(function(quote,err){
         if(err) {
             context.fail(err);
