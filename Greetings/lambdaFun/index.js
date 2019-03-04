@@ -116,14 +116,14 @@ function handleLaunchRequest(context) {
 function handleHelloIntent(context, request) {
     let name = request.intent.slots.FirstName.value;
     let options = {};
-    options.speechText = `Hello ${name}. This session is closed. `;
+    options.speechText = `Hello ${name}. This session is open. `;
     options.speechText += getTiming();
     getQuote(function(quote,err){
         if(err) {
             context.fail(err);
         } else {
             options.speechText += quote;
-            options.endSession = true;
+            options.endSession = false;
             let response = buildResponse(options);
             context.succeed(response);
         }
