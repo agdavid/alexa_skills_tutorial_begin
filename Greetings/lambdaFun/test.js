@@ -189,6 +189,64 @@ describe('All intents', function() {
     });
   });
 
+  describe(`Test AnotherQuoteIntent`, function() {
+    describe(`correct invocation`, function() {
+      before(function(done) {
+        event.request.intent = {};
+        event.session.attributes = {
+          quoteIntent: true
+        };
+        event.request.type = 'IntentRequest';
+        event.request.intent.name = 'AnotherQuoteIntent';
+        event.request.intent.slots = {};
+        ctx.done = done;
+        lambdaToTest.handler(event, ctx);
+      });
+  
+      it('valid response', function() {
+        validRsp(ctx,{
+          endSession: false,
+        });
+      });
+  
+      it('valid outputSpeech', function() {
+        expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/Back for more.*/)
+      });
+  
+      it('valid repromptSpeech', function() {
+        expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/You can say yes.*/)
+      });
+  
+      it('valid session', function() {
+        expect(ctx.speechResponse.sessionAttributes).to.not.be.undefined;
+        expect(ctx.speechResponse.sessionAttributes.quoteIntent).to.be.true;    
+      });
+    });
+    describe(`wrong invocation`, function() {
+      before(function(done) {
+        event.request.intent = {};
+        event.session.attributes = {
+          // no quoteIntent  
+        };
+        event.request.type = 'IntentRequest';
+        event.request.intent.name = 'AnotherQuoteIntent';
+        event.request.intent.slots = {};
+        ctx.done = done;
+        lambdaToTest.handler(event, ctx);
+      });
+  
+      it('valid response', function() {
+        validRsp(ctx,{
+          endSession: true,
+        });
+      });
+  
+      it('valid outputSpeech', function() {
+        expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/Wrong invocation.*/)
+      });
+    });
+  });
+
     // describe(`Test TBDIntentName`, function() {
 
     //     before(function(done) {
