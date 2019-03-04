@@ -66,6 +66,24 @@ function buildResponse(options) {
         };
     }
 
+    if (options.cardTitle) {
+        response.response.card = {
+            type: "Simple",
+            title: options.cardTitle,
+        }
+
+        if(options.imageUrl) {
+            response.response.card.type="Standard";
+            response.response.card.text = options.cardContent;
+            response.response.card.image = {
+                smallImageUrl: options.imageUrl,
+                largeImageUrl: options.imageUrl
+            };
+        } else {
+            response.response.card.content = options.cardContent
+        }
+    }
+
     if(options.session && options.session.attributes) {
         response.sessionAttributes = options.session.attributes;
     }
@@ -128,11 +146,14 @@ function handleHelloIntent(context, request) {
     let options = {};
     options.speechText = `Hello ${name}. This session is open. `;
     options.speechText += getTiming();
+    options.cardTitle=`Hello ${name}`;
     getQuote(function(quote,err){
         if(err) {
             context.fail(err);
         } else {
             options.speechText += quote;
+            options.cardContent = quote;
+            options.imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Hello_smile.png';
             options.endSession = false;
             let response = buildResponse(options);
             context.succeed(response);
