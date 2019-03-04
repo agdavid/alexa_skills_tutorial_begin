@@ -46,7 +46,7 @@ function validCard(ctx, standardCard) {
      expect(ctx.speechResponse.response.card.title).not.to.be.undefined;
      if(standardCard) {
       expect(ctx.speechResponse.response.card.type).to.be.equal('Standard');
-      expect(ctx.speechResponse.response.card.text.not.to.be.undefined);
+      expect(ctx.speechResponse.response.card.text).not.to.be.undefined;
       expect(ctx.speechResponse.response.card.image).not.to.be.undefined;
       expect(ctx.speechResponse.response.card.image.smallImageUrl).to.match(/^https:\/\//);
       expect(ctx.speechResponse.response.card.image.largeImageUrl).to.match(/^https:\/\//);
@@ -116,6 +116,43 @@ describe('All intents', function() {
     
      it('valid repromptSpeech', function() {
       expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>You can say for example.*<\/speak>/);
+     });
+
+  });
+
+  describe(`Test HelloIntent`, function() {
+
+    before(function(done) {
+      event.request.intent = {};
+      event.session.attributes = {};
+      event.request.type = 'IntentRequest';
+      event.request.intent.name = 'HelloIntent';
+      event.request.intent.slots = {
+        FirstName: {
+          name: 'FirstName',
+          value: 'John'
+        }
+      };
+      ctx.done = done;
+      lambdaToTest.handler(event, ctx);
+    });
+
+    it('valid response', function() {
+      validRsp(ctx,{
+        endSession: false,
+      });
+    });
+
+    it('valid outputSpeech', function() {
+      expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hello.*<\/speak>/);
+     });
+
+     it('valid repromptSpeech', function() {
+      expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>You can say for example.*<\/speak>/);
+     });
+
+     it('valid card', function() {
+      validCard(ctx, true);
      });
 
   });

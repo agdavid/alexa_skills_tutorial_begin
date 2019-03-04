@@ -155,6 +155,7 @@ function handleHelloIntent(context, request) {
     options.speechText = `Hello ${name}. This session is open. `;
     options.speechText += getTiming();
     options.cardTitle=`Hello ${name}`;
+    options.repromptText=`You can say for example, say hello to John or get me a quote.`;
     getQuote(function(quote,err){
         if(err) {
             context.fail(err);
