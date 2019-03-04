@@ -157,6 +157,38 @@ describe('All intents', function() {
 
   });
 
+  describe(`Test QuoteIntent`, function() {
+
+    before(function(done) {
+      event.request.intent = {};
+      event.session.attributes = {};
+      event.request.type = 'IntentRequest';
+      event.request.intent.name = 'QuoteIntent';
+      event.request.intent.slots = {};
+      ctx.done = done;
+      lambdaToTest.handler(event, ctx);
+    });
+
+    it('valid response', function() {
+      validRsp(ctx,{
+        endSession: false,
+      });
+    });
+
+    it('valid outputSpeech', function() {
+      expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/Here is your.*/)
+    });
+
+    it('valid repromptSpeech', function() {
+      expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/You can say yes.*/)
+    });
+
+    it('valid session', function() {
+      expect(ctx.speechResponse.sessionAttributes).to.not.be.undefined;
+      expect(ctx.speechResponse.sessionAttributes.quoteIntent).to.be.true;    
+    });
+  });
+
     // describe(`Test TBDIntentName`, function() {
 
     //     before(function(done) {
