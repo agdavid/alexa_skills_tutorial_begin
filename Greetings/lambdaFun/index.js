@@ -29,7 +29,9 @@ function handler(event, context) {
                 handleQuoteIntent(context, session);
             } else if (request.intent.name === 'AnotherQuoteIntent') {
                 handleAnotherQuoteIntent(context, session);
-            }else {
+            } else if (request.intent.name === 'AMAZON.StopIntent' || request.intent.name === 'AMAZON.CancelIntent') {
+                handleStopOrCancelIntent(context);
+            } else {
                 throw 'Unknown intent type';
             }
         } else if (request.type === 'SessionEndedRequest') {
@@ -180,4 +182,12 @@ function handleAnotherQuoteIntent(context, session) {
         options.endSession = true;
         context.succeed(buildResponse(options));
     }
+}
+
+function handleStopOrCancelIntent(context) {
+    let options = {};
+    options.speechText = 'All quoted out? Goodbye.';
+    options.endSession = true;
+    let response = buildResponse(options);
+    context.succeed(response);
 }
