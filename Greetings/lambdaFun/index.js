@@ -26,8 +26,10 @@ function handler(event, context) {
             if (request.intent.name === 'HelloIntent') {
                 handleHelloIntent(context, request);
             } else if (request.intent.name === 'QuoteIntent') {
-                handleQuoteIntent(context);
-            } else {
+                handleQuoteIntent(context, session);
+            } else if (request.intent.name === 'AnotherQuoteIntent') {
+                handleAnotherQuoteIntent(context, session);
+            }else {
                 throw 'Unknown intent type';
             }
         } else if (request.type === 'SessionEndedRequest') {
@@ -60,6 +62,10 @@ function buildResponse(options) {
                 ssml: "<speak>"+options.repromptText+"</speak>"
               }
         };
+    }
+
+    if(options.session && options.session.attributes) {
+        response.sessionAttributes = options.session.attributes;
     }
 
     return response;
@@ -132,7 +138,7 @@ function handleHelloIntent(context, request) {
     });
 }
 
-function handleQuoteIntent(context) {
+function handleQuoteIntent(context, session) {
     let options = {};
     options.speechText = `Here is your quote. `;
     getQuote(function(quote,err){
@@ -140,9 +146,37 @@ function handleQuoteIntent(context) {
             context.fail(err);
         } else {
             options.speechText += quote;
+            options.speechText += " Do you want to listen to one more quote?";
+            options.repromptText = "You can say yes or one more. ";
+            options.session.attributes.quoteIntent = true;
             options.endSession = false;
             let response = buildResponse(options);
             context.succeed(response);
         }
     });
+}
+
+function handleAnotherQuoteIntent(context, session) {
+    let options = {};
+    options.session = session;
+    if (session.attributes.quoteIntent) {
+        options.speechText = `Back for more. Here is your quote. `;
+        getQuote(function(quote,err){
+            if(err) {
+                context.fail(err);
+            } else {
+                options.speechText += quote;
+                options.speechText += " Do you want to listen to one more quote?";
+                options.repromptText = "You can say yes or one more. ";
+                options.session.attributes.quoteIntent = true;
+                options.endSession = false;
+                let response = buildResponse(options);
+                context.succeed(response);
+            }
+        });
+    } else {
+        options.speechText = " Wrong invocation of this intent. ";
+        options.endSession = true;
+        context.succeed(buildResponse(options));
+    }
 }
