@@ -1,1 +1,1 @@
-lambda-local -l index.js -h handler -e event.json
+env NODE_ENV=development lambda-local -l index.js -h handler -e event.json

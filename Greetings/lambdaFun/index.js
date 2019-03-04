@@ -8,6 +8,10 @@ module.exports = {
 
 function handler(event, context) {
     try {
+        if (process.env.NODE_ENV==='development') {
+            console.log(JSON.stringify(event, undefined, 2));
+        }
+        
         let request = event.request;        
         /*
         request.type
@@ -45,6 +49,10 @@ function handler(event, context) {
 };
 
 function buildResponse(options) {
+    if (process.env.NODE_ENV==='development') {
+        console.log(JSON.stringify(options, undefined, 2));
+    }
+
     // see https://developer.amazon.com/docs/custom-skills/request-and-response-json-reference.html#response-body-syntax
     let response = {
         version: "1.0",
