@@ -11,7 +11,7 @@ def hello():
     return "Hello world!"
 
 # curl -H "Content-Type: application/json" --data @event.json http://127.0.0.1:5000/alexa_end_point
-
+# curl -H "Content-Type: application/json" --data @event.json https://99aec5db.ngrok.io/alexa_end_point
 @app.route("/alexa_end_point", methods=['POST'])
 def alexa():
     event = request.get_json() 
