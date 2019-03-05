@@ -10,6 +10,8 @@ app = Flask(__name__)
 def hello():
     return "Hello world!"
 
+# curl -H "Content-Type: application/json" --data @event.json http://127.0.0.1:5000/alexa_end_point
+
 @app.route("/alexa_end_point", methods=['POST'])
 def alexa():
     event = request.get_json() 
@@ -30,7 +32,7 @@ def handle_hello_intent(req):
 
     name = req['intent']['slots']['FirstName']['value']
     res = Response()
-    res.speech_text = 'Hello {0}'.format(name)
+    res.speech_text = 'Hello {0} . '.format(name)
     res.speech_text += get_wish()
     return res.build_response()
 
