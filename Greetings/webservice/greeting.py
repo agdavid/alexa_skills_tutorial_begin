@@ -11,7 +11,7 @@ def hello():
     return "Hello world!"
 
 # curl -H "Content-Type: application/json" --data @event.json http://127.0.0.1:5000/alexa_end_point
-
+# curl -H "Content-Type: application/json" --data @event.json https://99aec5db.ngrok.io/alexa_end_point
 @app.route("/alexa_end_point", methods=['POST'])
 def alexa():
     event = request.get_json() 
@@ -58,7 +58,7 @@ def handle_launch_request():
     res.reprompt_text = 'You can say for example, say hello to John.'
     res.end_session = False
 
-    return res.build_response
+    return res.build_response()
 
 class Response(object):
     'Alexa skill response object with helper functions'
@@ -83,7 +83,7 @@ class Response(object):
         }
 
         if self.reprompt_text:
-                fnl_response['response']['reprompt_text'] = {
+                fnl_response['response']['reprompt'] = {
                     'outputSpeech': {
                         'type': 'SSML',
                         'ssml': '<speak>'+self.reprompt_text+'</speak>'
