@@ -95,4 +95,7 @@ class Response(object):
         return http_response
 
 if __name__ == "__main__":
-    app.run()
+    # app.run()
+    port = int(os.getenv('PORT', 5000))
+    print "Starting app on port %d" % port
+    app.run(debug=False, port=port, host='0.0.0.0')
