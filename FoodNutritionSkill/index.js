@@ -194,8 +194,8 @@ function onSessionEnded(sessionEndedRequest, session) {
 function onLaunch(launchRequest, session, response) {
   logger.debug('onLaunch requestId=' + launchRequest.requestId + ', sessionId=' + session.sessionId);
 
-  //response.speechText = 'Welcome msg';
-  //response.repromptText = 'Reprompt msg';
+  response.speechText = 'Hello, welcome to the Food Nutrition skill! You can ask me about calorie information of certain foods. Which food would you like to lookup?';
+  response.repromptText = 'For example, you can say how many calories are in butter salted.';
   response.shouldEndSession = false;
   response.done();
 }
