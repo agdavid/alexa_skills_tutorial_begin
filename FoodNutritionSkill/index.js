@@ -208,3 +208,70 @@ intentHandlers['HelloIntent'] = function(request,session,response,slots) {
   
 }
 **/
+
+intentHandlers['GetNutritionInfo'] = function(request,session,response,slots) {
+  //Intent logic
+  //slots.FoodItem
+  var foodDb = require('./food_db.json');
+  var results = searchFood(foodDb, slots.FoodItem);
+}
+
+// instructor search algorithm
+function searchFood(fDb, foodName) {
+  foodName = foodName.toLowerCase();
+  foodName = foodName.replace(/,/g, '');
+  var foodWords = foodName.split(/\s+/);
+  var regExps = []
+  var searchResult = []
+
+
+  foodWords.forEach(function(sWord) {
+    regExps.push(new RegExp(`^${sWord}(es|s)?\\b`));
+    regExps.push(new RegExp(`^${sWord}`));
+  });
+
+  fDb.forEach( function (item) {
+    var match = 1;
+    var fullName = item[0]
+    var cmpWeight = 0;
+
+    foodWords.forEach(function(sWord) {
+      if(!fullName.match(sWord)) {
+        match = 0;
+      }
+    });
+
+    if(match==0) {
+      return;
+    }
+
+    regExps.forEach(function(rExp) {
+      if(fullName.match(rExp)) {
+        cmpWeight += 10;
+      }
+    });
+
+    if (fullName.split(/\s+/).length == foodWords.length) {
+        cmpWeight += 10;
+    }
+
+
+    searchResult.push([item, cmpWeight]);
+
+  });
+
+  var finalResult = searchResult.filter(function(x){return x[1]>=10});
+  if(finalResult.length == 0) {
+    finalResult = searchResult;
+  } else {
+    finalResult.sort(function(a, b) {
+        return b[1] - a[1];
+    });
+  }
+
+  finalResult = finalResult.map(function(x) {
+    return x[0]
+  });
+
+  return finalResult;
+}
