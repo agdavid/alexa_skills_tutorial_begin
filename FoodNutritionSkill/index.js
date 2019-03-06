@@ -2,6 +2,9 @@
 
 'use strict';
 
+var MAX_RESPONSES = 3;
+var MAX_FOOD_ITEMS = 10;
+
 var winston = require('winston');
 
 var logger = new (winston.Logger)({
@@ -214,6 +217,30 @@ intentHandlers['GetNutritionInfo'] = function(request,session,response,slots) {
   //slots.FoodItem
   var foodDb = require('./food_db.json');
   var results = searchFood(foodDb, slots.FoodItem);
+
+  if (results.length == 0) {
+    response.speechText = `I couldn\'t find a matching food for ${slots.FoodItem}.`;
+    response.speechText += ' Could you try a different food?';
+    response.shouldEndSession = true;
+    response.done();
+  } else {
+    results.slice(0, MAX_RESPONSES).forEach(function(item) {
+      response.speechText += `100 grams of ${item[0]} contains ${item[1]} calories. `;
+    });
+
+    if (results.length > MAX_RESPONSES) {
+      response.speechText += 'More foods matched the search. ';
+      response.speechText += 'You can say more information to get more foods. ';
+      response.speechText += 'Or say stop if you\'re done.';
+      session.attributes.resultLength = results.length; // store results count
+      session.attributes.results = results.slice(MAX_RESPONSES, MAX_FOOD_ITEMS); // store remaining results
+      response.shouldEndSession = false;
+      response.done();
+    } else {
+      response.shouldEndSession = true;
+      response.done();
+    }
+  }
 }
 
 // instructor search algorithm
