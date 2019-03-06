@@ -12,7 +12,7 @@ var logger = new (winston.Logger)({
 
 var intentHandlers = {};
 
-if(process.env.NODE_DEBUG_EN) {
+if(process.env.NODE_ENV) {
   logger.level = 'debug';
 }
 
@@ -22,6 +22,7 @@ exports.handler = function (event, context) {
 
         logger.info('event.session.application.applicationId=' + event.session.application.applicationId);
 
+        // for publication, must check APP_ID otherwise others can send skill to your Lambda endpoint
         if (APP_ID !== '' && event.session.application.applicationId !== APP_ID) {
             context.fail('Invalid Application ID');
          }
