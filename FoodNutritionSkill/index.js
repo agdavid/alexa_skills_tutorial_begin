@@ -243,6 +243,17 @@ intentHandlers['GetNutritionInfo'] = function(request,session,response,slots) {
   }
 }
 
+intentHandlers['GetNextEventIntent'] = function(request,session,response,slots) {
+  response.speechText = `Your search resulted in ${session.attributes.resultLength} food items. `;
+  response.speechText = ` Here are a few food itesm from the search.`;
+  response.speechText = ` Please add more keywords from this list for better results.`;
+  session.attributes.results.forEach(function(item) {
+    response.speechText += `${item[0]}. `;
+  });
+  response.shouldEndSession = true;
+  response.done();
+}
+
 // instructor search algorithm
 function searchFood(fDb, foodName) {
   foodName = foodName.toLowerCase();
