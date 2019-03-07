@@ -102,48 +102,48 @@ describe('All intents', function() {
        });
      });
 
-     //it('valid outputSpeech', function() {
-     //  expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
-     //});
+     it('valid outputSpeech', function() {
+      expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
+     });
     
-     //it('valid repromptSpeech', function() {
-     //  expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
-     //});
+     it('valid repromptSpeech', function() {
+      expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
+     });
 
   });
 
-    describe(`Test TBDIntentName`, function() {
+    // describe(`Test TBDIntentName`, function() {
 
-        before(function(done) {
-          event.request.intent = {};
-          event.session.attributes = {};
-          event.request.type = 'IntentRequest';
-          event.request.intent.name = 'TBDIntentName';
-          event.request.intent.slots = {
-            TBDSlotName: {
-              name: 'TBDSlotName',
-              value: 'TBDValue'
-            }
-          };
-          ctx.done = done;
-          lambdaToTest.handler(event , ctx);
-        });
+    //     before(function(done) {
+    //       event.request.intent = {};
+    //       event.session.attributes = {};
+    //       event.request.type = 'IntentRequest';
+    //       event.request.intent.name = 'TBDIntentName';
+    //       event.request.intent.slots = {
+    //         TBDSlotName: {
+    //           name: 'TBDSlotName',
+    //           value: 'TBDValue'
+    //         }
+    //       };
+    //       ctx.done = done;
+    //       lambdaToTest.handler(event , ctx);
+    //     });
 
-       it('valid response', function() {
-         validRsp(ctx, {
-           endSession: TBD
-         });
-       });
+    //    it('valid response', function() {
+    //      validRsp(ctx, {
+    //        endSession: TBD
+    //      });
+    //    });
 
-       //it('valid outputSpeech', function() {
-       //  expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
-       //});
+    //    //it('valid outputSpeech', function() {
+    //    //  expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
+    //    //});
     
-       //it('valid repromptSpeech', function() {
-       //  expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
-       //});
+    //    //it('valid repromptSpeech', function() {
+    //    //  expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
+    //    //});
 
-    });
+    // });
 
 
 });
