@@ -59,7 +59,7 @@ var event = {
       userId: 'usrid123'
     },
     application: {
-      applicationId: 'amzn1.echo-sdk-ams.app.1234'
+      applicationId: 'amzn1.ask.skill.f5cf61da-007e-4d6f-8db4-9325c0735787'
     }
   },
   version: '1.0',
@@ -83,6 +83,7 @@ var event = {
 
 describe('All intents', function() {
   var ctx = new Context();
+  var storedSession;
 
 
   describe('Test LaunchIntent', function() {
@@ -103,47 +104,180 @@ describe('All intents', function() {
      });
 
      it('valid outputSpeech', function() {
-      expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
+       expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
      });
     
-     it('valid repromptSpeech', function() {
-      expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
+     it('valid outputSpeech', function() {
+       expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
      });
 
   });
 
-    // describe(`Test TBDIntentName`, function() {
+  var expResults = {
+    'butter salted': {
+      endSession: true,
+      searchResults: 1
+    },
+    'orange': {
+      endSession: false,
+      searchResults: 18
+    },
+    'apples raw': {
+      endSession: false,
+      searchResults: 11
+    },
+    'toy': {
+      endSession: true,
+      searchResults: 0
+    }
+  };
 
-    //     before(function(done) {
-    //       event.request.intent = {};
-    //       event.session.attributes = {};
-    //       event.request.type = 'IntentRequest';
-    //       event.request.intent.name = 'TBDIntentName';
-    //       event.request.intent.slots = {
-    //         TBDSlotName: {
-    //           name: 'TBDSlotName',
-    //           value: 'TBDValue'
-    //         }
-    //       };
-    //       ctx.done = done;
-    //       lambdaToTest.handler(event , ctx);
-    //     });
+  for(var key in expResults) {
 
-    //    it('valid response', function() {
-    //      validRsp(ctx, {
-    //        endSession: TBD
-    //      });
-    //    });
+    describe(`Test GetNutritionInfo ${key}`, function() {
+        var options = expResults[key];
+        var testFood = key;
 
-    //    //it('valid outputSpeech', function() {
-    //    //  expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/<speak>Hi,.*<\/speak>/);
-    //    //});
-    
-    //    //it('valid repromptSpeech', function() {
-    //    //  expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>For example.*<\/speak>/);
-    //    //});
 
-    // });
+        before(function(done) {
+          event.request.intent = {};
+          event.session.attributes = {};
+          event.request.type = 'IntentRequest';
+          event.request.intent.name = 'GetNutritionInfo';
+          event.request.intent.slots = {
+            FoodItem: {
+              name: 'FoodItem',
+              value: testFood
+            }
+          };
+          ctx.done = done;
+          lambdaToTest.handler(event , ctx);
+        });
+
+       it('valid response', function() {
+         validRsp(ctx, options);
+       });
+
+       it('valid card', function() {
+         validCard(ctx);
+       });
+
+       it('valid outputSpeech', function() {
+         if(options.searchResults === 0) {
+           expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/Could not find any food item/);
+         } else {
+           var num = ctx.speechResponse.response.outputSpeech.ssml.match(/100 grams/g).length;
+           if(options.searchResults > 3) {
+             expect(num).to.be.equal(3);
+           } else {
+             expect(num).to.be.equal(options.searchResults);
+           }
+         }
+       });
+
+      if(!options.endSession) {
+       it('valid reprompt', function() {
+         expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/You can say/);
+       });
+      }
+
+    });
+
+    if (!expResults[key].endSession) {
+
+      describe(`Test GetNextEventIntent ${key}`, function() {
+          var options = expResults[key];
+          var testFood = key;
+
+          before(function(done) {
+            event.request.intent = {};
+            event.session.attributes = ctx.speechResponse.sessionAttributes;
+            event.request.type = 'IntentRequest';
+            event.request.intent.name = 'GetNextEventIntent';
+            event.request.intent.slots = {};
+            ctx.done = done;
+            lambdaToTest.handler(event , ctx);
+          });
+
+         it('valid response', function() {
+           validRsp(ctx, {endSession: true});
+         });
+
+         it('valid card', function() {
+           validCard(ctx);
+           expect(ctx.speechResponse.response.card.content).to.match(new RegExp(`Your search resulted in ${options.searchResults} food items`));
+         });
+
+         it('valid outputSpeech', function() {
+           expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(new RegExp(`Your search resulted in ${options.searchResults} food items`));
+         });
+
+         //it('valid reprompt', function() {
+         //  validReprompt(ctx);
+         //  //expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>You.*<\/speak>/);
+         //});
+
+      });
+
+      describe(`Test AMAZON.StopIntent ${key}`, function() {
+          var options = expResults[key];
+          var testFood = key;
+
+          before(function(done) {
+            event.request.intent = {};
+            event.session.attributes = ctx.speechResponse.sessionAttributes;
+            event.request.type = 'IntentRequest';
+            event.request.intent.name = 'AMAZON.StopIntent';
+            event.request.intent.slots = {};
+            ctx.done = done;
+            lambdaToTest.handler(event , ctx);
+          });
+
+         it('valid response', function() {
+           validRsp(ctx, {endSession: true});
+         });
+
+         it('valid outputSpeech', function() {
+           expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/Good Bye./);
+         });
+
+         //it('valid reprompt', function() {
+         //  validReprompt(ctx);
+         //  //expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/<speak>You.*<\/speak>/);
+         //});
+
+      });
+
+
+    }
+  }
+
+  describe(`Test GetNutritionInfo empty slot`, function() {
+
+      before(function(done) {
+        event.request.intent = {};
+        event.session.attributes = {};
+        event.request.type = 'IntentRequest';
+        event.request.intent.name = 'GetNutritionInfo';
+        event.request.intent.slots = {};
+        ctx.done = done;
+        lambdaToTest.handler(event , ctx);
+      });
+
+     it('valid response', function() {
+       validRsp(ctx, {endSession:false});
+     });
+
+
+     it('valid outputSpeech', function() {
+         expect(ctx.speechResponse.response.outputSpeech.ssml).to.match(/Looks like/);
+     });
+
+     it('valid reprompt', function() {
+       expect(ctx.speechResponse.response.reprompt.outputSpeech.ssml).to.match(/For example/);
+     });
+
+  });
 
 
 });
