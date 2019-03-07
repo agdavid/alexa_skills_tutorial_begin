@@ -7,7 +7,7 @@ var MAX_FOOD_ITEMS = 10;
 
 var winston = require('winston');
 
-var logger = new (winston.Logger)({
+var logger = winston.createLogger({
     transports: [
       new (winston.transports.Console)({ prettyPrint: true, timestamp: true, json: false, stderrLevels:['error']})
     ]
