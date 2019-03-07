@@ -64,7 +64,9 @@ exports.handler = function (event, context) {
 function getSlots(req) {
   var slots = {}
   for(var key in req.intent.slots) {
-    slots[key] = req.intent.slots[key].value;
+    if(req.intent.slots[key].value !== undefined) {
+      slots[key] = req.intent.slots[key].value;
+    }
   }
   return slots;
 }
@@ -154,7 +156,7 @@ function buildAlexaResponse(response) {
   if (!response.shouldEndSession && response._session && response._session.attributes) {
     alexaResponse.sessionAttributes = response._session.attributes;
   }
-  logger.debug('Final response:\n', JSON.stringify(alexaResponse,null,2),'\n\n');
+  logger.debug('Final response:\n', JSON.stringify(alexaResponse,null,2));
   return alexaResponse;
 }
 
@@ -180,7 +182,7 @@ function getError(err) {
 //--------------------------------------------- Skill specific logic starts here ----------------------------------------- 
 
 //Add your skill application ID from amazon devloper portal
-var APP_ID = '';
+var APP_ID = process.env.APP_ID;
 
 function onSessionStarted(sessionStartedRequest, session) {
     logger.debug('onSessionStarted requestId=' + sessionStartedRequest.requestId + ', sessionId=' + session.sessionId);
@@ -197,7 +199,7 @@ function onSessionEnded(sessionEndedRequest, session) {
 function onLaunch(launchRequest, session, response) {
   logger.debug('onLaunch requestId=' + launchRequest.requestId + ', sessionId=' + session.sessionId);
 
-  response.speechText = 'Hello, welcome to the Food Nutrition skill! You can ask me about calorie information of certain foods. Which food would you like to lookup?';
+  response.speechText = 'Hi, welcome to the Food Nutrition skill! You can ask me about calorie information of certain foods. Which food would you like to lookup?';
   response.repromptText = 'For example, you can say how many calories are in butter salted.';
   response.shouldEndSession = false;
   response.done();
@@ -211,56 +213,89 @@ intentHandlers['HelloIntent'] = function(request,session,response,slots) {
   
 }
 **/
+var MAX_RESPONSES = 3;
+var MAX_FOOD_ITEMS = 10;
 
 intentHandlers['GetNutritionInfo'] = function(request,session,response,slots) {
   //Intent logic
   //slots.FoodItem
+
+  if(slots.FoodItem === undefined) {
+    response.speechText = 'Looks like you forgot to mention a food name. Which food calorie information would you like to know? ';
+    response.repromptText = 'For example, you can say, how many calories are in butter salted. ';
+    response.shouldEndSession = false;
+    response.done();
+    return;
+  }
+
   var foodDb = require('./food_db.json');
   var results = searchFood(foodDb, slots.FoodItem);
 
-  if (results.length == 0) {
-    response.speechText = `I couldn\'t find a matching food for ${slots.FoodItem}.`;
-    response.speechText += ' Could you try a different food?';
+  response.cardTitle = `Nutrition Lookup results for: ${slots.FoodItem}`;
+  response.cardContent = '';
+  
+  if(results.length==0) {
+    response.speechText = `Could not find any food item for ${slots.FoodItem}. Please try different food item. `;
+    response.cardContent += response.speechText;
     response.shouldEndSession = true;
     response.done();
   } else {
-    results.slice(0, MAX_RESPONSES).forEach(function(item) {
-      response.speechText += `100 grams of ${item[0]} contains ${item[1]} calories. `;
+
+    results.slice(0, MAX_RESPONSES).forEach( function(item) {
+      response.speechText  += `100 grams of ${item[0]} contains ${item[1]} calories. `; 
+      response.cardContent += `100 grams of '${item[0]}' contains '${item[1]}' Calories (kcal)\n`;
     });
 
-    if (results.length > MAX_RESPONSES) {
-      response.speechText += 'More foods matched the search. ';
-      response.speechText += 'You can say more information to get more foods. ';
-      response.speechText += 'Or say stop if you\'re done.';
-      session.attributes.resultLength = results.length; // store results count
-      session.attributes.results = results.slice(MAX_RESPONSES, MAX_FOOD_ITEMS); // store remaining results
+
+    if(results.length > MAX_RESPONSES) {
+      response.speechText += `There are more foods that matched your search. You can say more information for more information. Or say stop to stop the skill. `; 
+      response.cardContent += `There are more foods matched your search. You can say more information for more information. Or say stop to stop the skill. `; 
+      response.repromptText = `You can say more information or stop.`; 
+      session.attributes.resultLength = results.length;
+      session.attributes.FoodItem = slots.FoodItem;
+      session.attributes.results = results.slice(MAX_RESPONSES,MAX_FOOD_ITEMS);
       response.shouldEndSession = false;
       response.done();
+
     } else {
       response.shouldEndSession = true;
       response.done();
     }
+
+
   }
+
+
 }
+
 
 intentHandlers['GetNextEventIntent'] = function(request,session,response,slots) {
-  response.speechText = `Your search resulted in ${session.attributes.resultLength} food items. `;
-  response.speechText = ` Here are a few food itesm from the search.`;
-  response.speechText = ` Please add more keywords from this list for better results.`;
-  session.attributes.results.forEach(function(item) {
-    response.speechText += `${item[0]}. `;
-  });
+
+  if(session.attributes.results) {
+    response.cardTitle = `Nutrition Lookup more information for: ${session.attributes.FoodItem}`;
+
+    response.speechText  = `Your search resulted in ${session.attributes.resultLength} food items. Here are the few food items from search. Please add more keywords from this list for better results.`;
+    response.cardContent = `${response.speechText}\n`;
+
+
+    session.attributes.results.forEach(function(item) {
+      response.speechText += `${item[0]}. `; 
+      response.cardContent += `'${item[0]}'\n`;
+    });
+  } else {
+    response.speechText  = `Wrong invocation of this intent. `;
+  }
   response.shouldEndSession = true;
   response.done();
-}
+
+};
 
 intentHandlers['AMAZON.StopIntent'] = function(request,session,response,slots) {
-  response.speechText = 'Good Bye.';
+  response.speechText  = `Good Bye. `;
   response.shouldEndSession = true;
   response.done();
-}
+};
 
-// instructor search algorithm
 function searchFood(fDb, foodName) {
   foodName = foodName.toLowerCase();
   foodName = foodName.replace(/,/g, '');
