@@ -182,7 +182,7 @@ function getError(err) {
 //--------------------------------------------- Skill specific logic starts here ----------------------------------------- 
 
 //Add your skill application ID from amazon devloper portal
-var APP_ID = 'amzn1.ask.skill.f5cf61da-007e-4d6f-8db4-9325c0735787';
+var APP_ID = process.env.APP_ID;
 
 function onSessionStarted(sessionStartedRequest, session) {
     logger.debug('onSessionStarted requestId=' + sessionStartedRequest.requestId + ', sessionId=' + session.sessionId);
