@@ -248,7 +248,7 @@ intentHandlers['GetNutritionInfo'] = function(request,session,response,slots) {
 
 
     if(results.length > MAX_RESPONSES) {
-      response.speechText += `There are more foods that matched your search. You can say more information for more information. Or say stop to stop the skill. `; 
+      response.speechText += `There are more foods matched your search. You can say more information for more information. Or say stop to stop the skill. `; 
       response.cardContent += `There are more foods matched your search. You can say more information for more information. Or say stop to stop the skill. `; 
       response.repromptText = `You can say more information or stop.`; 
       session.attributes.resultLength = results.length;
@@ -304,6 +304,43 @@ intentHandlers['AMAZON.HelpIntent'] = function(request,session,response,slots) {
   response.shouldEndSession = false;
   response.done();
 }
+
+intentHandlers['GetQuizIntent'] = function(request,session,response,slots) {
+  var fruitsDb = require('./fruits_db.json');
+  var index = Math.floor(Math.random() * fruitsDb.length);
+  response.speechText  = `How many calories in ${fruitsDb[index][0]}. `;
+  response.repromptText  = `Please tell number of calories. `;
+  session.attributes.fruit = fruitsDb[index];
+  response.shouldEndSession = false;
+  response.done();
+}
+
+
+intentHandlers['QuizAnswerIntent'] = function(request,session,response,slots) {
+  var fruitInfo = session.attributes.fruit;
+  var answer = Number(slots.Answer)
+  var calories = Number(fruitInfo[1])
+
+  if (calories === answer) {
+    response.speechText  = `Correct answer. Congrats. `;
+  } else if( Math.abs(calories - answer) < 5 )  {
+    response.speechText  = `You are pretty close. ${fruitInfo[0]} contains ${fruitInfo[1]} calories. `;
+  } else {
+    response.speechText  = `Wrong answer. ${fruitInfo[0]} contains ${fruitInfo[1]} calories. `;
+  }
+  response.shouldEndSession = true;
+  response.done();
+}
+
+intentHandlers['DontKnowIntent'] = function(request,session,response,slots) {
+  var fruitInfo = session.attributes.fruit;
+  var calories = Number(fruitInfo[1])
+
+  response.speechText  = `No problem. ${fruitInfo[0]} contains ${fruitInfo[1]} calories. `;
+  response.shouldEndSession = true;
+  response.done();
+}
+
 
 function searchFood(fDb, foodName) {
   foodName = foodName.toLowerCase();
