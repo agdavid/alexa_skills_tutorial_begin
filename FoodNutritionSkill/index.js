@@ -296,6 +296,8 @@ intentHandlers['AMAZON.StopIntent'] = function(request,session,response,slots) {
   response.done();
 };
 
+intentHandlers['AMAZON.CancelIntent'] =  intentHandlers['AMAZON.StopIntent'];
+
 intentHandlers['AMAZON.HelpIntent'] = function(request,session,response,slots) {
   response.speechText = "You can ask Nutrition Lookup skill about calorie information of food items. For a given food item, it provides you Calories per 100 grams. For example, you can say butter salted, to know about its Calories per 100 grams. Alternatively, you can also say how many calories in butter salted. If skill not opened you can also say in one shot, Alexa, ask Nutri Lookup about butter salted. Please refer to skill description for all possible sample utterences. Which food calorie information would you like to know?";
   response.repromptText = "Which food calorie information would you like to know? or You can say stop to stop the skill.";
